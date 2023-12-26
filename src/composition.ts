@@ -1,8 +1,7 @@
 import * as fs from 'fs/promises';
 
 type CsvCell = string;
-type CsvColumns = ReadonlyArray<CsvCell>;
-type CsvNumberColumns = ReadonlyArray<number>;
+type CsvColumns<T> = ReadonlyArray<T>;
 type CsvRow = ReadonlyArray<CsvCell>;
 type CsvFile = ReadonlyArray<CsvRow>;
 
@@ -13,7 +12,7 @@ type CsvFile = ReadonlyArray<CsvRow>;
   // Chain Functions
   const columnValues = extractColumn(1, data);
   const removedHeaderData = removeRow(0, columnValues);
-  const scoreColumnAsFloat = convertTo(parseFloat, removedHeaderData);
+  const scoreColumnAsFloat = convertTo<number>(parseFloat, removedHeaderData);
   const chainAverageScore = calculateAverageScore(scoreColumnAsFloat);
   console.log({ chainAverageScore });
 
@@ -24,7 +23,7 @@ type CsvFile = ReadonlyArray<CsvRow>;
   const headerRowIndex = 0;
   const removeHeaderRow = curriedRemoveRow(headerRowIndex);
 
-  const convertToFloat = curriedConvertTo(parseFloat);
+  const convertToFloat = curriedConvertTo<number>(parseFloat);
   const compositionAverageScore = pipe(data, scoreColumnValues, removeHeaderRow, convertToFloat, calculateAverageScore);
   console.log({ compositionAverageScore });
 })();
@@ -34,37 +33,37 @@ async function readCsvFile(filename: string): Promise<CsvFile> {
   return lines.split(/\r\n/).map((line) => line.split(','));
 }
 
-function extractColumn(columnIndex: number, data: CsvFile): CsvColumns {
+function extractColumn(columnIndex: number, data: CsvFile): CsvColumns<CsvCell> {
   return data.map((row) => row[columnIndex]);
 }
 
-function removeRow(rowIndex: number, data: CsvColumns): CsvColumns {
+function removeRow(rowIndex: number, data: CsvColumns<CsvCell>): CsvColumns<CsvCell> {
   return data.filter((_, index) => index !== rowIndex);
 }
 
-function convertTo(converter: Function, data: CsvColumns) {
-  return data.map((cell) => converter(cell));
+function convertTo<T>(converter: Function, data: CsvColumns<CsvCell>) {
+  return data.map<T>((cell) => converter(cell));
 }
 
-function calculateAverageScore(columnValues: CsvNumberColumns) {
+function calculateAverageScore(columnValues: CsvColumns<number>) {
   const sum = columnValues.reduce((sum, value) => sum + value, 0);
   return sum / columnValues.length;
 }
 
 function curriedExtractColumn(columnIndex: number): Function {
-  return (data: CsvFile): CsvColumns => {
+  return (data: CsvFile): CsvColumns<CsvCell> => {
     return data.map((row) => row[columnIndex]);
   };
 }
 
 function curriedRemoveRow(rowIndex: number): Function {
-  return (data: CsvColumns): CsvColumns => {
+  return (data: CsvColumns<CsvCell>): CsvColumns<CsvCell> => {
     return data.filter((_, index) => index !== rowIndex);
   };
 }
 
-function curriedConvertTo(converter: Function): Function {
-  return (data: CsvColumns): ReadonlyArray<unknown> => {
+function curriedConvertTo<T>(converter: Function): Function {
+  return (data: CsvColumns<CsvCell>): ReadonlyArray<T> => {
     return data.map((cell) => converter(cell));
   };
 }
