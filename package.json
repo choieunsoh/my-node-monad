@@ -1,0 +1,18 @@
+{
+  "name": "my-node-monad",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "debug": "tsc --sourcemap",
+    "dev": "ts-node ./src/composition.ts",
+    "monad": "ts-node ./src/monad.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "typescript": "^5.3.3"
+  }
+}
